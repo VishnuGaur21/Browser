@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern YouTube & Music Player</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --surface: rgba(22, 27, 46, 0.85);
+            --surface-hover: rgba(35, 43, 72, 0.95);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #6366f1;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0b0f19 75%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 24px 30px 24px;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1040px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+        }
+
+        .brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.chrome-btn {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.35);
+            color: #a5b4fc;
+        }
+
+        .action-btn.chrome-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 1040px;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            aspect-ratio: 16 / 9;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Controls & Search */
+        .controls-card {
+            width: 100%;
+            max-width: 1040px;
+            margin-top: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            backdrop-filter: blur(12px);
+        }
+
+        .now-playing-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .now-playing-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .equalizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+        }
+
+        .eq-bar {
+            width: 3px;
+            background: #a855f7;
+            border-radius: 2px;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+        .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+        .eq-bar:nth-child(2) { height: 12px; animation-delay: 0.3s; }
+        .eq-bar:nth-child(3) { height: 9px; animation-delay: 0.2s; }
+        .eq-bar:nth-child(4) { height: 14px; animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 100% { transform: scaleY(0.4); }
+            50% { transform: scaleY(1.0); }
+        }
+
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(11, 15, 25, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+        }
+
+        .play-btn {
+            background: var(--accent-gradient);
+            border: none;
+            color: #fff;
+            padding: 0 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .play-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Chips */
+        .chips-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--accent);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand">
+            <div class="brand-icon">▶</div>
+            <div class="brand-text">
+                <h1>Autonomous YouTube Player</h1>
+                <p>Native in-browser video & music playback</p>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="action-btn chrome-btn" onclick="openInChrome()" title="Launch full video on Google Chrome">
+                <span>🌐 Open in Chrome</span>
+            </button>
+            <button class="action-btn" onclick="navigateToStartpage()" title="Go back to Startpage">
+                <span>🏠 Home</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- YouTube Embed Video Frame -->
+    <div class="player-container">
+        <iframe id="video-frame"
+                src=""
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen>
+        </iframe>
+    </div>
+
+    <!-- Controls & Quick Search -->
+    <div class="controls-card">
+        <div class="now-playing-row">
+            <div class="now-playing-title">
+                <div class="equalizer">
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                </div>
+                <span id="playing-query-label">Now Playing: Top Music</span>
+            </div>
+            <span style="font-size:12px; color:#64748b;">Autonomous Copilot Connected</span>
+        </div>
+
+        <form class="search-form" onsubmit="handlePlaySearch(event)">
+            <input type="text" class="search-input" id="search-box" placeholder="Search another song, video, artist or genre..." />
+            <button type="submit" class="play-btn">▶ Play</button>
+        </form>
+
+        <div class="chips-row">
+            <span style="font-size:12px; color:#94a3b8; align-self:center; margin-right:4px;">Presets:</span>
+            <button class="chip" onclick="playQuery('lofi hip hop radio beats to relax')">☕ Lofi Chill</button>
+            <button class="chip" onclick="playQuery('popular top hits 2026 music')">🔥 Top Hits</button>
+            <button class="chip" onclick="playQuery('synthwave retro chill beats')">🌌 Synthwave</button>
+            <button class="chip" onclick="playQuery('calm relaxing piano study music')">🎹 Calm Piano</button>
+            <button class="chip" onclick="playQuery('deep focus ambient coding music')">💻 Deep Focus</button>
+            <button class="chip" onclick="playQuery('arijit singh top songs')">🇮🇳 Bollywood Hits</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuery = "relaxing music";
+
+        function getInitialQuery() {
+            // Check hash #q=...
+            const hash = window.location.hash;
+            if (hash && hash.includes("q=")) {
+                const match = hash.match(/q=([^&]+)/);
+                if (match) return decodeURIComponent(match[1]);
+            }
+            // Check search query ?q=...
+            const params = new URLSearchParams(window.location.search);
+            const q = params.get('q');
+            if (q) return q;
+
+            return "popular music";
+        }
+
+        function playQuery(query) {
+            if (!query || !query.trim()) return;
+            currentQuery = query.trim();
+
+            const labelEl = document.getElementById('playing-query-label');
+            if (labelEl) labelEl.textContent = "Now Playing: " + currentQuery;
+
+            const searchBox = document.getElementById('search-box');
+            if (searchBox) searchBox.value = currentQuery;
+
+            const frame = document.getElementById('video-frame');
+            if (frame) {
+                const encoded = encodeURIComponent(currentQuery);
+                frame.src = "https://www.youtube-nocookie.com/embed?listType=search&list=" + encoded + "&autoplay=1";
+            }
+        }
+
+        function handlePlaySearch(e) {
+            e.preventDefault();
+            const input = document.getElementById('search-box');
+            if (input && input.value.trim()) {
+                playQuery(input.value.trim());
+            }
+        }
+
+        function openInChrome() {
+            window.alert("CHROME:" + currentQuery);
+        }
+
+        function navigateToStartpage() {
+            window.alert("NAVIGATE:startpage.html");
+        }
+
+        // On load
+        window.addEventListener('DOMContentLoaded', () => {
+            const initial = getInitialQuery();
+            playQuery(initial);
+        });
+
+        // Listen for hash change
+        window.addEventListener('hashchange', () => {
+            const updated = getInitialQuery();
+            playQuery(updated);
+        });
+    </script>
+</body>
+</html>
